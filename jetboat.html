@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JetBoat — Location de bateaux à Marseille</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0B1E33;
+  --blue:#1565C0;
+  --sky:#E8F4FD;
+  --ocean:#0077B6;
+  --white:#FFFFFF;
+  --offwhite:#F7F9FC;
+  --border:#E2E8F0;
+  --muted:#64748B;
+  --text:#1E293B;
+  --coral:#E85D26;
+  --success:#059669;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--offwhite);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;height:56px;
+  background:var(--navy);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--white);cursor:pointer;letter-spacing:-0.3px}
+.logo em{font-style:normal;color:#5BA4F5}
+.back-btn{background:none;border:none;color:rgba(255,255,255,0.55);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px;padding:6px 0;transition:color 0.2s}
+.back-btn:hover{color:white}
+
+/* ── HOME ── */
+#home{
+  background:var(--navy);
+  display:flex;flex-direction:column;
+  min-height:100vh;
+}
+.home-hero{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 24px 40px;text-align:center;
+  background:radial-gradient(ellipse at 50% 0%, rgba(21,101,192,0.4) 0%, transparent 65%);
+}
+.home-eyebrow{
+  font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;
+  color:rgba(255,255,255,0.4);margin-bottom:20px;
+}
+.home-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(36px,8vw,52px);
+  color:var(--white);line-height:1.1;
+  margin-bottom:16px;letter-spacing:-0.5px;
+}
+.home-title em{font-style:normal;color:#5BA4F5}
+.home-desc{
+  color:rgba(255,255,255,0.5);font-size:15px;font-weight:300;
+  line-height:1.7;margin-bottom:48px;max-width:340px;
+}
+.home-actions{display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px}
+.btn-primary{
+  padding:15px 24px;background:var(--coral);color:white;
+  border:none;border-radius:10px;font-size:15px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:background 0.2s,transform 0.15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-primary:hover{background:#d14e1b;transform:translateY(-1px)}
+.btn-ghost{
+  padding:15px 24px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.8);
+  border:1px solid rgba(255,255,255,0.12);border-radius:10px;font-size:15px;font-weight:500;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-ghost:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25)}
+.home-footer{
+  padding:24px;text-align:center;
+  border-top:1px solid rgba(255,255,255,0.06);
+  display:flex;justify-content:center;gap:32px;
+}
+.home-stat{text-align:center}
+.home-stat-n{font-family:'DM Serif Display',serif;font-size:22px;color:#5BA4F5}
+.home-stat-l{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;letter-spacing:0.5px}
+
+/* ── SEARCH / LOUEUR ── */
+#loueur{background:var(--offwhite)}
+.search-bar{
+  background:var(--navy);padding:16px 20px 20px;
+}
+.search-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;
+}
+.search-field{
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;padding:10px 12px;color:white;font-size:13px;
+  font-family:'Inter',sans-serif;outline:none;cursor:pointer;
+  transition:border-color 0.2s;width:100%;
+  -webkit-appearance:none;
+}
+.search-field:focus{border-color:#5BA4F5}
+.search-field option{background:var(--navy);color:white}
+.search-btn{
+  width:100%;padding:12px;background:var(--coral);color:white;border:none;
+  border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:background 0.2s;
+}
+.search-btn:hover{background:#d14e1b}
+
+/* ANNONCES */
+.annonces-wrap{padding:16px 20px}
+.annonces-header{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;
+}
+.annonces-label{font-size:13px;color:var(--muted);font-weight:400}
+.annonce-card{
+  background:white;border-radius:12px;margin-bottom:14px;overflow:hidden;
+  border:1px solid var(--border);cursor:pointer;
+  transition:box-shadow 0.2s,border-color 0.2s;
+}
+.annonce-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.08);border-color:#CBD5E1}
+.annonce-visual{
+  height:150px;display:flex;align-items:center;justify-content:center;
+  font-size:64px;position:relative;
+  background:linear-gradient(135deg,var(--navy),var(--ocean));
+}
+.annonce-visual.v2{background:linear-gradient(135deg,#004d7a,#008793)}
+.annonce-visual.v3{background:linear-gradient(135deg,#0a3d62,#1e3799)}
+.annonce-visual.v4{background:linear-gradient(135deg,#1a1a2e,#16213e)}
+.annonce-body{padding:14px}
+.annonce-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.annonce-name{font-weight:600;font-size:16px;color:var(--text);line-height:1.3}
+.annonce-price{font-family:'DM Serif Display',serif;font-size:19px;color:var(--navy);white-space:nowrap;margin-left:12px}
+.annonce-price span{font-family:'Inter',sans-serif;font-size:12px;font-weight:400;color:var(--muted)}
+.annonce-loc{font-size:12px;color:var(--muted);margin-bottom:10px}
+.annonce-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{background:var(--sky);color:var(--ocean);font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px}
+.annonce-footer{display:flex;justify-content:flex-end;padding-top:10px;border-top:1px solid var(--border)}
+.btn-reserver{
+  padding:9px 18px;background:var(--navy);color:white;border:none;
+  border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:background 0.2s;
+}
+.btn-reserver:hover{background:var(--blue)}
+
+/* ── RÉSERVATION ── */
+#reservation{background:var(--offwhite)}
+.resa-header{
+  background:var(--navy);padding:20px;
+  display:flex;align-items:center;gap:16px;
+}
+.resa-icon{font-size:40px}
+.resa-header-info{}
+.resa-header-name{font-family:'DM Serif Display',serif;font-size:20px;color:white}
+.resa-header-sub{font-size:13px;color:rgba(255,255,255,0.5);margin-top:2px}
+.resa-body{padding:16px 20px;max-width:500px;margin:0 auto}
+.form-card{background:white;border-radius:12px;padding:18px;margin-bottom:14px;border:1px solid var(--border)}
+.form-card-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:white;
+  outline:none;transition:border-color 0.2s;-webkit-appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ocean)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5}
+.recap-card{
+  background:var(--sky);border:1px solid #BFDBFE;border-radius:12px;padding:16px;margin-bottom:14px;
+}
+.recap-row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:8px}
+.recap-row:last-child{
+  margin-bottom:0;padding-top:10px;border-top:1px solid #BFDBFE;
+  font-weight:600;font-size:15px;color:var(--navy);
+}
+.btn-confirm{
+  width:100%;padding:15px;background:var(--coral);color:white;border:none;
+  border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:background 0.2s;margin-bottom:10px;
+}
+.btn-confirm:hover{background:#d14e1b}
+.resa-note{text-align:center;font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ── SUCCESS ── */
+#success-screen{
+  background:var(--navy);min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 24px;text-align:center;
+}
+.success-circle{
+  width:80px;height:80px;border-radius:50%;background:rgba(5,150,105,0.15);
+  border:2px solid var(--success);display:flex;align-items:center;justify-content:center;
+  font-size:36px;margin:0 auto 24px;animation:pop 0.4s ease;
+}
+@keyframes pop{0%{transform:scale(0.5);opacity:0}100%{transform:scale(1);opacity:1}}
+.success-title{font-family:'DM Serif Display',serif;font-size:28px;color:white;margin-bottom:10px}
+.success-desc{color:rgba(255,255,255,0.5);font-size:15px;font-weight:300;line-height:1.7;margin-bottom:32px;max-width:300px}
+.success-card{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px;padding:18px;width:100%;max-width:300px;margin-bottom:32px;text-align:left;
+}
+.success-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:10px;color:rgba(255,255,255,0.6)}
+.success-row:last-child{margin-bottom:0}
+.success-row strong{color:white}
+.btn-back-home{
+  padding:14px 32px;background:var(--coral);color:white;border:none;
+  border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;
+}
+
+/* ── PROPRIO ── */
+#proprio{background:var(--offwhite)}
+.proprio-header{
+  background:var(--navy);padding:20px;
+}
+.proprio-header-title{font-family:'DM Serif Display',serif;font-size:22px;color:white;margin-bottom:4px}
+.proprio-header-sub{font-size:13px;color:rgba(255,255,255,0.45);font-weight:300}
+.proprio-body{padding:16px 20px;max-width:500px;margin:0 auto}
+
+.info-card{
+  background:white;border-radius:12px;padding:18px;margin-bottom:14px;
+  border:1px solid var(--border);
+}
+.info-card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+
+/* EMPTY STATE */
+.empty-state{
+  padding:40px 20px;text-align:center;
+}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:0.4}
+.empty-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+.empty-desc{font-size:13px;color:var(--muted);line-height:1.6;max-width:240px;margin:0 auto}
+
+/* ADD ANNONCE */
+.btn-add{
+  width:100%;padding:14px;background:var(--navy);color:white;border:none;
+  border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;
+  gap:8px;transition:background 0.2s;
+}
+.btn-add:hover{background:var(--blue)}
+
+/* DISPO */
+.dispo-months{display:flex;gap:8px;margin-bottom:12px}
+.dispo-month-btn{
+  padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  border:1.5px solid var(--border);background:white;color:var(--muted);
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;
+}
+.dispo-month-btn.active{background:var(--navy);color:white;border-color:var(--navy)}
+.dispo-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px}
+.day-label{font-size:10px;font-weight:600;color:var(--muted);text-align:center;padding:4px 0}
+.dispo-day{
+  aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;cursor:pointer;border:1.5px solid transparent;transition:all 0.15s;font-weight:500;
+}
+.dispo-day.libre{background:#EFF6FF;color:var(--blue)}
+.dispo-day.libre:hover{background:#DBEAFE}
+.dispo-day.indispo{background:#FEF2F2;color:#DC2626}
+.dispo-day.today{border-color:var(--coral)!important}
+.dispo-day.past{opacity:0.3;cursor:default;pointer-events:none}
+.dispo-legend{display:flex;gap:16px;font-size:11px;color:var(--muted)}
+.leg{display:flex;align-items:center;gap:5px}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+
+/* ADD ANNONCE SCREEN */
+#add-annonce{background:var(--offwhite)}
+.add-header{background:var(--navy);padding:20px}
+.add-title{font-family:'DM Serif Display',serif;font-size:20px;color:white}
+.add-sub{font-size:13px;color:rgba(255,255,255,0.45);margin-top:3px}
+.add-body{padding:16px 20px;max-width:500px;margin:0 auto}
+.photo-zone{
+  height:140px;border:2px dashed var(--border);border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;cursor:pointer;transition:border-color 0.2s;background:white;margin-bottom:12px;
+  color:var(--muted);font-size:13px;
+}
+.photo-zone:hover{border-color:var(--ocean)}
+.photo-zone-icon{font-size:28px;opacity:0.5}
+.tarif-wrap{display:flex;gap:8px;align-items:center}
+.tarif-wrap input{
+  flex:1;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:'Inter',sans-serif;color:var(--text);outline:none;
+  transition:border-color 0.2s;
+}
+.tarif-wrap input:focus{border-color:var(--ocean)}
+.tarif-wrap select{
+  padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:'Inter',sans-serif;color:var(--text);outline:none;
+  background:white;-webkit-appearance:none;cursor:pointer;
+  transition:border-color 0.2s;
+}
+.tarif-wrap select:focus{border-color:var(--ocean)}
+.tarif-sep{font-size:13px;color:var(--muted);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- ════════ HOME ════════ -->
+<div id="home" class="screen active">
+  <div class="home-hero">
+    <div class="home-eyebrow">Marseille · Côte Bleue · Calanques</div>
+    <div class="home-title">Loue un bateau.<br><em>Simplement.</em></div>
+    <div class="home-desc">Réserve directement auprès de propriétaires locaux. Sans agence, sans intermédiaire, sans complication.</div>
+    <div class="home-actions">
+      <button class="btn-primary" onclick="go('loueur')">Trouver une embarcation</button>
+      <button class="btn-ghost" onclick="go('proprio')">J'ai un bateau à louer</button>
+    </div>
+  </div>
+  <div class="home-footer">
+    <div class="home-stat"><div class="home-stat-n">0%</div><div class="home-stat-l">Commission beta</div></div>
+    <div class="home-stat"><div class="home-stat-n">2 min</div><div class="home-stat-l">Pour réserver</div></div>
+    <div class="home-stat"><div class="home-stat-n">Local</div><div class="home-stat-l">Propriétaires vérifiés</div></div>
+  </div>
+</div>
+
+<!-- ════════ LOUEUR ════════ -->
+<div id="loueur" class="screen">
+  <div class="topbar">
+    <div class="logo" onclick="go('home')">Jet<em>Boat</em></div>
+    <button class="back-btn" onclick="go('home')">← Accueil</button>
+  </div>
+  <div class="search-bar">
+    <div class="search-grid">
+      <select class="search-field">
+        <option value="">Tout type</option>
+        <option>Voilier</option>
+        <option>Bateau à moteur</option>
+        <option>Jet-ski</option>
+        <option>Catamaran</option>
+        <option>Kayak / Paddle</option>
+      </select>
+      <select class="search-field">
+        <option value="">Durée</option>
+        <option>1 heure</option>
+        <option>Demi-journée</option>
+        <option>Journée</option>
+        <option>Week-end</option>
+      </select>
+      <select class="search-field">
+        <option value="">Personnes</option>
+        <option>1–2</option>
+        <option>3–4</option>
+        <option>5–8</option>
+        <option>8+</option>
+      </select>
+      <select class="search-field">
+        <option value="">Budget</option>
+        <option>Moins de 50€</option>
+        <option>50–100€</option>
+        <option>100–200€</option>
+        <option>200€+</option>
+      </select>
+    </div>
+    <button class="search-btn">Rechercher</button>
+  </div>
+
+  <div class="annonces-wrap">
+    <div class="annonces-header">
+      <div class="annonces-label">4 annonces disponibles</div>
+    </div>
+
+    <div class="annonce-card" onclick="openResa('Voilier aux Calanques','⛵','180','/ sortie','Vieux-Port · Demi-journée · 6 personnes max')">
+      <div class="annonce-visual">⛵</div>
+      <div class="annonce-body">
+        <div class="annonce-top">
+          <div class="annonce-name">Voilier aux Calanques</div>
+          <div class="annonce-price">180€<span> / sortie</span></div>
+        </div>
+        <div class="annonce-loc">📍 Vieux-Port, Marseille</div>
+        <div class="annonce-chips">
+          <span class="chip">Voilier</span>
+          <span class="chip">6 pers max</span>
+          <span class="chip">Demi-journée</span>
+        </div>
+        <div class="annonce-footer">
+          <button class="btn-reserver">Réserver</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="annonce-card" onclick="openResa('Bateau à moteur – Frioul','🚤','120','/ sortie','Pointe Rouge · 2 heures · 4 personnes max')">
+      <div class="annonce-visual v2">🚤</div>
+      <div class="annonce-body">
+        <div class="annonce-top">
+          <div class="annonce-name">Bateau à moteur — Frioul</div>
+          <div class="annonce-price">120€<span> / sortie</span></div>
+        </div>
+        <div class="annonce-loc">📍 Pointe Rouge, Marseille</div>
+        <div class="annonce-chips">
+          <span class="chip">Moteur</span>
+          <span class="chip">4 pers max</span>
+          <span class="chip">2 heures</span>
+        </div>
+        <div class="annonce-footer">
+          <button class="btn-reserver">Réserver</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="annonce-card" onclick="openResa('Jet-ski – Plage du Prado','🛥️','65','/ heure','Prado · 1 heure · 2 personnes max')">
+      <div class="annonce-visual v3">🛥️</div>
+      <div class="annonce-body">
+        <div class="annonce-top">
+          <div class="annonce-name">Jet-ski — Plage du Prado</div>
+          <div class="annonce-price">65€<span> / heure</span></div>
+        </div>
+        <div class="annonce-loc">📍 Plage du Prado, Marseille</div>
+        <div class="annonce-chips">
+          <span class="chip">Jet-ski</span>
+          <span class="chip">2 pers max</span>
+          <span class="chip">1 heure</span>
+        </div>
+        <div class="annonce-footer">
+          <button class="btn-reserver">Réserver</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="annonce-card" onclick="openResa('Catamaran – Côte Bleue','🛶','280','/ journée','Carry-le-Rouet · Journée · 8 personnes max')">
+      <div class="annonce-visual v4">🛶</div>
+      <div class="annonce-body">
+        <div class="annonce-top">
+          <div class="annonce-name">Catamaran — Côte Bleue</div>
+          <div class="annonce-price">280€<span> / journée</span></div>
+        </div>
+        <div class="annonce-loc">📍 Carry-le-Rouet</div>
+        <div class="annonce-chips">
+          <span class="chip">Catamaran</span>
+          <span class="chip">8 pers max</span>
+          <span class="chip">Journée</span>
+        </div>
+        <div class="annonce-footer">
+          <button class="btn-reserver">Réserver</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ RÉSERVATION ════════ -->
+<div id="reservation" class="screen">
+  <div class="topbar">
+    <div class="logo" onclick="go('home')">Jet<em>Boat</em></div>
+    <button class="back-btn" onclick="go('loueur')">← Annonces</button>
+  </div>
+  <div class="resa-header">
+    <div class="resa-icon" id="resa-icon">⛵</div>
+    <div class="resa-header-info">
+      <div class="resa-header-name" id="resa-name">—</div>
+      <div class="resa-header-sub" id="resa-sub">—</div>
+    </div>
+  </div>
+  <div class="resa-body">
+    <div class="form-card">
+      <div class="form-card-title">Créneau souhaité</div>
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="resa-date">
+      </div>
+      <div class="field">
+        <label>Heure de départ</label>
+        <select>
+          <option>08:00</option><option>09:00</option><option>10:00</option>
+          <option>11:00</option><option>13:00</option><option>14:00</option>
+          <option>15:00</option><option>16:00</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Nombre de personnes</label>
+        <select id="resa-pers">
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option>
+          <option>7</option><option>8</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">Vos coordonnées</div>
+      <div class="field"><label>Prénom et nom</label><input type="text" placeholder="Jean Martin"></div>
+      <div class="field"><label>Téléphone</label><input type="tel" placeholder="06 00 00 00 00"></div>
+      <div class="field"><label>Message au propriétaire <span style="font-weight:400;color:var(--muted)">(optionnel)</span></label>
+        <textarea placeholder="Présentez-vous, posez vos questions..."></textarea>
+      </div>
+    </div>
+
+    <div class="recap-card">
+      <div class="recap-row"><span id="recap-label">Location</span><span id="recap-prix">—</span></div>
+      <div class="recap-row"><span>Commission JetBoat (10%)</span><span id="recap-commission">—</span></div>
+      <div class="recap-row"><span>Total</span><span id="recap-total">—</span></div>
+    </div>
+
+    <button class="btn-confirm" onclick="confirmer()">Envoyer la demande de réservation</button>
+    <div class="resa-note">Le propriétaire vous contacte sous 2h pour confirmer.<br>Paiement effectué directement avec le propriétaire.</div>
+  </div>
+</div>
+
+<!-- ════════ SUCCESS ════════ -->
+<div id="success-screen" class="screen">
+  <div class="success-circle">✓</div>
+  <div class="success-title">Demande envoyée</div>
+  <div class="success-desc">Le propriétaire a été notifié. Il vous contacte dans les 2 heures pour confirmer.</div>
+  <div class="success-card">
+    <div class="success-row"><span>Activité</span><strong id="s-name">—</strong></div>
+    <div class="success-row"><span>Date</span><strong id="s-date">—</strong></div>
+    <div class="success-row"><span>Total</span><strong id="s-total">—</strong></div>
+    <div class="success-row"><span>Statut</span><strong style="color:#5BA4F5">En attente de confirmation</strong></div>
+  </div>
+  <button class="btn-back-home" onclick="go('home')">Retour à l'accueil</button>
+</div>
+
+<!-- ════════ PROPRIO ════════ -->
+<div id="proprio" class="screen">
+  <div class="topbar">
+    <div class="logo" onclick="go('home')">Jet<em>Boat</em></div>
+    <button class="back-btn" onclick="go('home')">← Accueil</button>
+  </div>
+  <div class="proprio-header">
+    <div class="proprio-header-title">Espace propriétaire</div>
+    <div class="proprio-header-sub">Gérez vos annonces et réservations</div>
+  </div>
+  <div class="proprio-body">
+
+    <!-- Demandes -->
+    <div class="info-card">
+      <div class="info-card-title">Demandes reçues</div>
+      <div class="empty-state">
+        <div class="empty-icon">📬</div>
+        <div class="empty-title">Aucune demande pour l'instant</div>
+        <div class="empty-desc">Vos demandes de réservation apparaîtront ici dès qu'un client vous contacte.</div>
+      </div>
+    </div>
+
+    <!-- Mes annonces -->
+    <div class="info-card">
+      <div class="info-card-title">Mes annonces</div>
+      <div class="empty-state">
+        <div class="empty-icon">⚓</div>
+        <div class="empty-title">Pas encore d'annonce</div>
+        <div class="empty-desc">Publiez votre première annonce et soyez visible par des milliers de visiteurs à Marseille.</div>
+      </div>
+      <button class="btn-add" onclick="go('add-annonce')">+ Publier une annonce</button>
+    </div>
+
+    <!-- Disponibilités -->
+    <div class="info-card">
+      <div class="info-card-title">Mes disponibilités — Juillet 2025</div>
+      <div class="dispo-months">
+        <button class="dispo-month-btn active">Juillet</button>
+        <button class="dispo-month-btn">Août</button>
+        <button class="dispo-month-btn">Septembre</button>
+      </div>
+      <div class="dispo-grid" id="dispo-grid"></div>
+      <div class="dispo-legend">
+        <div class="leg"><div class="leg-dot" style="background:#EFF6FF;border:1px solid var(--blue)"></div>Disponible</div>
+        <div class="leg"><div class="leg-dot" style="background:#FEF2F2"></div>Indisponible</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════ AJOUTER ANNONCE ════════ -->
+<div id="add-annonce" class="screen">
+  <div class="topbar">
+    <div class="logo" onclick="go('home')">Jet<em>Boat</em></div>
+    <button class="back-btn" onclick="go('proprio')">← Mon espace</button>
+  </div>
+  <div class="add-header">
+    <div class="add-title">Nouvelle annonce</div>
+    <div class="add-sub">Remplissez les informations pour être visible</div>
+  </div>
+  <div class="add-body">
+    <div class="form-card">
+      <div class="form-card-title">Photo</div>
+      <div class="photo-zone">
+        <div class="photo-zone-icon">📷</div>
+        <span>Ajouter une photo</span>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">Votre embarcation</div>
+      <div class="field">
+        <label>Type</label>
+        <select style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);outline:none;background:white;-webkit-appearance:none;">
+          <option>Voilier</option>
+          <option>Bateau à moteur</option>
+          <option>Jet-ski</option>
+          <option>Catamaran</option>
+          <option>Kayak / Paddle</option>
+        </select>
+      </div>
+      <div class="field"><label>Titre de l'annonce</label><input type="text" placeholder="Ex : Voilier aux Calanques"></div>
+      <div class="field"><label>Capacité (personnes)</label><input type="number" placeholder="4" min="1" max="20"></div>
+      <div class="field"><label>Port d'attache</label><input type="text" placeholder="Ex : Vieux-Port, Marseille"></div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">Tarif</div>
+      <div class="field">
+        <label>Prix</label>
+        <div class="tarif-wrap">
+          <input type="number" placeholder="65">
+          <div class="tarif-sep">€ par</div>
+          <select>
+            <option>heure</option>
+            <option>demi-journée</option>
+            <option>journée</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">Description</div>
+      <div class="field">
+        <textarea style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);outline:none;resize:vertical;min-height:100px;line-height:1.5;transition:border-color 0.2s;" placeholder="Décrivez votre embarcation, les sorties proposées, ce qui est inclus..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn-confirm" onclick="publier()" style="margin-bottom:10px">Publier l'annonce</button>
+    <div class="resa-note" style="margin-bottom:32px">Votre annonce est publiée immédiatement · Commission 10% sur chaque réservation</div>
+  </div>
+</div>
+
+<script>
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// Date par défaut = aujourd'hui
+const today = new Date();
+document.getElementById('resa-date').valueAsDate = today;
+
+// Ouvrir réservation
+let _prix = 0, _name = '';
+function openResa(name, icon, prix, unite, sub){
+  _prix = parseInt(prix); _name = name;
+  document.getElementById('resa-icon').textContent = icon;
+  document.getElementById('resa-name').textContent = name;
+  document.getElementById('resa-sub').textContent = sub;
+  document.getElementById('recap-label').textContent = name;
+  document.getElementById('recap-prix').textContent = prix + '€';
+  const comm = Math.round(_prix * 0.1);
+  const total = _prix + comm;
+  document.getElementById('recap-commission').textContent = comm + '€';
+  document.getElementById('recap-total').textContent = total + '€';
+  go('reservation');
+}
+
+function confirmer(){
+  const date = document.getElementById('resa-date').value;
+  const d = date ? new Date(date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : '—';
+  const comm = Math.round(_prix * 0.1);
+  document.getElementById('s-name').textContent = _name;
+  document.getElementById('s-date').textContent = d;
+  document.getElementById('s-total').textContent = (_prix + comm) + '€';
+  go('success-screen');
+}
+
+function publier(){
+  alert('Annonce publiée avec succès.');
+  go('proprio');
+}
+
+// Calendrier
+function buildCal(){
+  const grid = document.getElementById('dispo-grid');
+  grid.innerHTML = '';
+  ['L','M','M','J','V','S','D'].forEach(d=>{
+    const h = document.createElement('div');
+    h.className = 'day-label';
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+  const todayDate = new Date().getDate();
+  for(let i=1;i<=31;i++){
+    const el = document.createElement('div');
+    el.className = 'dispo-day libre' + (i < todayDate ? ' past' : '') + (i === todayDate ? ' today' : '');
+    el.textContent = i;
+    el.onclick = ()=>{
+      el.classList.toggle('indispo');
+      el.classList.toggle('libre');
+    };
+    grid.appendChild(el);
+  }
+}
+buildCal();
+
+document.querySelectorAll('.dispo-month-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.dispo-month-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  };
+});
+</script>
+</body>
+</html>
